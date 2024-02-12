@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
+// import { getSocket, initSocket } from "@/app/lib/socket";
 import ChoosePiece from "../ui/choose-piece";
+// import { Socket } from "socket.io-client";
 import io from "socket.io-client";
 
-// Create a socket instance outside the component to ensure it's shared across renders
-const socket = io("http://localhost:5000");
+const socket = io('http://localhost:5000')
 
 export default function Page() {
   const [gameBoard, setGameBoard] = useState(Array(9).fill(null));
@@ -14,10 +15,20 @@ export default function Page() {
   const [winner, setWinner] = useState<string>("");
   const [isDraw, setIsDraw] = useState<boolean>(false);
   const [room, setRoom] = useState({ roomId: "" });
-  const [ joined, setJoined ] = useState<boolean>(false);
+
+  // useEffect(() => {
+  //   initSocket();
+  //   socket = getSocket(); // Assign the initialized socket
+
+  //   // Clean-up function to disconnect the socket when the component unmounts
+  //   return () => {
+  //     socket?.disconnect();
+  //   };
+  // }, []);
 
   useEffect(() => {
-    // Set up event listeners when the component mounts
+    // if (!socket) return; // Make sure socket is defined before using it
+
     socket.on("connect", () => {
       console.log("Connected to the server");
     });
@@ -29,22 +40,27 @@ export default function Page() {
     socket.on("updateBoard", (newBoard) => {
       console.log(newBoard);
       setGameBoard(newBoard);
+      // setTurn((prev) => !prev);
     });
 
     socket.on("connect_error", (error) => {
       console.log("Connection error:", error);
     });
 
-    // Clean up event listeners when the component unmounts
+    // Clean-up function to remove event listeners when the component unmounts
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("updateBoard");
-      socket.off("connect_error");
+      socket?.off("connect");
+      socket?.off("disconnect");
+      socket?.off("updateBoard");
+      socket?.off("connect_error");
     };
-  }, []);
+  }, [socket]); // Make sure to include socket in the dependency array
 
   const handleMove = (index: number) => {
+    // if (!socket) {
+    //   socket = getSocket();
+    // } // Make sure socket is defined before using it
+
     socket.emit("move", {
       index: index,
       player: piece,
@@ -52,31 +68,13 @@ export default function Page() {
       sender: socket.id,
     });
   };
-
+  
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const button = e.target as HTMLButtonElement;
     if (turn && !winner && !isDraw) {
       button.innerText = piece;
       handleMove(parseInt(button.id));
     }
-  };
-
-  const joinRoom = (roomField: string) => {
-    setJoined((prev) => !prev);
-    const newRoom = {
-      roomId: roomField,
-      sender: socket.id
-    }
-    socket.emit("join_room", newRoom);
-    setRoom(newRoom);
-  };
-
-  const leaveRoom = (roomField: string) => {
-    socket.emit("leave_room", room);
-    // setRoom((prev) => {
-    //   return { ...prev, roomId: "" };
-    // }); // Clear the room ID
-    setJoined(false);
   };
 
   return piece ? (
@@ -98,6 +96,6 @@ export default function Page() {
       </div>
     </div>
   ) : (
-    <ChoosePiece joinRoomFunction={joinRoom} setPieceFunction={setPiece} />
+    <ChoosePiece setRoomFunction={setRoom} setPieceFunction={setPiece} />
   );
 }
