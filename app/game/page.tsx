@@ -11,12 +11,12 @@ export default function Page() {
   const [turn, setTurn] = useState<boolean>(false);
   const [winner, setWinner] = useState<string>("");
   const [isDraw, setIsDraw] = useState<boolean>(false);
+  const [gameStart, setGameStart] = useState<boolean>(false);
   const [room, setRoom] = useState({
     roomId: "",
     sender: socket.id,
     player: "",
   });
-  const [gameStart, setGameStart] = useState<boolean>(false);
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -42,6 +42,14 @@ export default function Page() {
       }
     });
 
+    socket.on(
+      "gameResult",
+      ({ winner, isDraw }: { winner: string; isDraw: boolean }) => {
+        setWinner(winner);
+        setIsDraw(isDraw);
+      }
+    );
+
     socket.on("connect_error", (error) => {
       console.log("Connection error:", error);
     });
@@ -51,6 +59,8 @@ export default function Page() {
       socket.off("disconnect");
       socket.off("updateBoard");
       socket.off("connect_error");
+      socket.off("gameStart");
+      socket.off("handleTurns");
     };
   }, [socket, room.player]);
 
@@ -90,15 +100,32 @@ export default function Page() {
 
   return room.player ? (
     <div className="h-[calc(100vh-5rem)] flex justify-center items-center flex-col gap-10">
-      {gameStart ? (
-        turn ? (
-          <h1 className="text-2xl text-green-500">Your Turn</h1>
+      {winner || isDraw ? (
+        isDraw ? (
+          <h1 className="text-blue-500">The game is Draw</h1>
         ) : (
-          <h1 className="text-2xl text-red-500">Opponents Turn</h1>
+          <h1
+            className={clsx("text-2xl", {
+              "text-green-500": room.player === winner,
+              "text-red-500": room.player !== winner,
+            })}
+          >
+            {room.player === winner ? "You Win" : "You Lose"}
+          </h1>
         )
+      ) : gameStart ? (
+        <h1
+          className={clsx("text-2xl", {
+            "text-green-500": turn,
+            "text-red-500": !turn,
+          })}
+        >
+          {turn ? "Your Turn" : "Opponents Turn"}
+        </h1>
       ) : (
         <h1 className="text-2xl text-blue-500">Waiting For Opponent</h1>
       )}
+
       <div className="container">
         {gameBoard.map((cell: number, index: number) => (
           <button
