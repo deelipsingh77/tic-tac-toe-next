@@ -1,16 +1,15 @@
 import React, { useRef, useState } from "react";
 
 interface ChoosePieceProps {
-  setPieceFunction: (piece: string) => void;
-  joinRoomFunction: (roomField: string) => void;
+  joinRoomFunction: (player: string, roomField: string) => void;
 }
 
 const ChoosePiece: React.FC<ChoosePieceProps> = ({
-  setPieceFunction,
   joinRoomFunction,
 }) => {
   const [roomField, setRoomField] = useState<string>("");
   const roomRef: any = useRef();
+
   return (
     <div className="h-[calc(100vh-5rem)] flex justify-center items-center">
       <div className="flex shadow-xl w-60 h-72 flex-col gap-10">
@@ -29,8 +28,7 @@ const ChoosePiece: React.FC<ChoosePieceProps> = ({
           <button
             className="border-4 p-4 rounded-2xl shadow-lg hover:bg-slate-500 hover:text-white w-36"
             onClick={() => {
-              setPieceFunction("X");
-              joinRoomFunction(roomRef.current.value);
+              joinRoomFunction("X", roomRef.current.value);
             }}
           >
             X
@@ -38,8 +36,7 @@ const ChoosePiece: React.FC<ChoosePieceProps> = ({
           <button
             className="border-4 p-4 rounded-2xl shadow-lg hover:bg-slate-500 hover:text-white w-36"
             onClick={() => {
-              setPieceFunction("O");
-              joinRoomFunction(roomRef.current.value);
+              joinRoomFunction("O", roomRef.current.value);
             }}
           >
             O

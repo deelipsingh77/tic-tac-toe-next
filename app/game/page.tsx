@@ -8,11 +8,15 @@ const socket = io("http://localhost:5000");
 
 export default function Page() {
   const [gameBoard, setGameBoard] = useState(Array(9).fill(null));
-  const [piece, setPiece] = useState<string>("");
   const [turn, setTurn] = useState<boolean>(false);
   const [winner, setWinner] = useState<string>("");
   const [isDraw, setIsDraw] = useState<boolean>(false);
-  const [room, setRoom] = useState({ roomId: "" });
+  const [room, setRoom] = useState({
+    roomId: "",
+    sender: socket.id,
+    player: "",
+  });
+  const [gameStart, setGameStart] = useState<boolean>(false);
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -23,8 +27,19 @@ export default function Page() {
       console.log("Disconnected from the server");
     });
 
+    socket.on("gameStart", (status) => {
+      setGameStart(status);
+    });
+
     socket.on("updateBoard", (newBoard) => {
       setGameBoard(newBoard);
+      setTurn((prev) => !prev);
+    });
+
+    socket.on("handleTurns", (piece) => {
+      if (piece == room.player) {
+        setTurn((prev) => !prev);
+      }
     });
 
     socket.on("connect_error", (error) => {
@@ -37,12 +52,12 @@ export default function Page() {
       socket.off("updateBoard");
       socket.off("connect_error");
     };
-  }, []);
+  }, [socket, room.player]);
 
   const handleMove = (index: number) => {
     socket.emit("move", {
       index: index,
-      player: piece,
+      player: room.player,
       roomId: room.roomId,
       sender: socket.id,
     });
@@ -51,17 +66,17 @@ export default function Page() {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const button = e.target as HTMLButtonElement;
     if (turn && !winner && !isDraw) {
-      button.innerText = piece;
+      button.innerText = room.player;
       handleMove(parseInt(button.id));
     }
   };
 
-  const joinRoom = (roomField: string) => {
+  const joinRoom = (player: string, roomField: string) => {
     const newRoom = {
       roomId: roomField,
       sender: socket.id,
-      player: piece
-    }
+      player: player,
+    };
     socket.emit("join_room", newRoom);
     setRoom(newRoom);
   };
@@ -73,8 +88,17 @@ export default function Page() {
     // }); // Clear the room ID
   };
 
-  return piece ? (
-    <div className="h-[calc(100vh-5rem)] flex justify-center items-center">
+  return room.player ? (
+    <div className="h-[calc(100vh-5rem)] flex justify-center items-center flex-col gap-10">
+      {gameStart ? (
+        turn ? (
+          <h1 className="text-2xl text-green-500">Your Turn</h1>
+        ) : (
+          <h1 className="text-2xl text-red-500">Opponents Turn</h1>
+        )
+      ) : (
+        <h1 className="text-2xl text-blue-500">Waiting For Opponent</h1>
+      )}
       <div className="container">
         {gameBoard.map((cell: number, index: number) => (
           <button
@@ -92,6 +116,6 @@ export default function Page() {
       </div>
     </div>
   ) : (
-    <ChoosePiece joinRoomFunction={joinRoom} setPieceFunction={setPiece} />
+    <ChoosePiece joinRoomFunction={joinRoom} />
   );
 }
