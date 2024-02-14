@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import ChoosePiece from "../ui/choose-piece";
 import io from "socket.io-client";
+import TurnIndicator from "../ui/turn-indicator";
+import GameBoard from "../ui/game-board";
 
 const socket = io("http://localhost:5000");
 
@@ -50,8 +52,8 @@ export default function Page() {
       }
     );
 
-    socket.on("joinRoomResponse", (newRoom)=>{
-      if(newRoom.sender === room.sender){
+    socket.on("joinRoomResponse", (newRoom) => {
+      if (newRoom.sender === room.sender) {
         setRoom(newRoom);
       }
     });
@@ -120,33 +122,12 @@ export default function Page() {
           </h1>
         )
       ) : gameStart ? (
-        <h1
-          className={clsx("text-2xl", {
-            "text-green-500": turn,
-            "text-red-500": !turn,
-          })}
-        >
-          {turn ? "Your Turn" : "Opponents Turn"}
-        </h1>
+        <TurnIndicator turn={turn} />
       ) : (
         <h1 className="text-2xl text-blue-500">Waiting For Opponent</h1>
       )}
 
-      <div className="container">
-        {gameBoard.map((cell: number, index: number) => (
-          <button
-            className={clsx("cell-primary", {
-              "border-right": [0, 1, 3, 4, 6, 7].includes(index),
-              "border-top": [3, 4, 5, 6, 7, 8].includes(index),
-            })}
-            key={index}
-            id={String(index)}
-            onClick={handleClick}
-          >
-            {gameBoard[index]}
-          </button>
-        ))}
-      </div>
+      <GameBoard gameBoard={gameBoard} handleClick={handleClick} />
     </div>
   ) : (
     <ChoosePiece joinRoomFunction={joinRoom} />
