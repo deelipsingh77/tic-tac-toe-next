@@ -50,6 +50,12 @@ export default function Page() {
       }
     );
 
+    socket.on("joinRoomResponse", (newRoom)=>{
+      if(newRoom.sender === room.sender){
+        setRoom(newRoom);
+      }
+    });
+
     socket.on("connect_error", (error) => {
       console.log("Connection error:", error);
     });
@@ -62,7 +68,7 @@ export default function Page() {
       socket.off("gameStart");
       socket.off("handleTurns");
     };
-  }, [socket, room.player]);
+  }, [room]);
 
   const handleMove = (index: number) => {
     socket.emit("move", {
