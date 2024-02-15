@@ -6,7 +6,8 @@ import io from "socket.io-client";
 import TurnIndicator from "../ui/turn-indicator";
 import GameBoard from "../ui/game-board";
 
-const url: string = process.env.NEXT_PUBLIC_URL || "http://localhost:5000";
+const url: string = process.env.NEXT_PUBLIC_URL;
+console.log(url);
 const socket = io(url);
 
 export default function Page() {
