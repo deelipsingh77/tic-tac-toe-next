@@ -6,7 +6,7 @@ import io from "socket.io-client";
 import TurnIndicator from "../ui/turn-indicator";
 import GameBoard from "../ui/game-board";
 
-const socket = io("https://tic-tac-toe-server-ykw6.onrender.com:5000",{
+const socket = io("https://tic-tac-toe-server-ykw6.onrender.com:10000",{
   transports: ['websocket']
 });
 
