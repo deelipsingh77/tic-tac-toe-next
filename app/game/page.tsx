@@ -105,6 +105,8 @@ export default function Page() {
       sender: socket.id,
       player: player,
     };
+    setWinner("");
+    setIsDraw(false);
     setRoomPass(newRoom);
     setGameStart(false);
     socket.emit("join_room", newRoom);
@@ -116,6 +118,8 @@ export default function Page() {
       return { ...prev, roomId: "" };
     });
     setJoinStatus(false);
+    setWinner("");
+    setIsDraw(false);
   };
 
   return joinStatus ? (
@@ -146,7 +150,12 @@ export default function Page() {
       <GameBoard gameBoard={gameBoard} handleClick={handleClick} />
       <div>
         {(winner || isDraw) && (
-          <button className="border-4 p-4 rounded-2xl shadow-lg hover:bg-green-500 hover:text-white w-36">
+          <button
+            className="border-4 p-4 rounded-2xl shadow-lg hover:bg-green-500 hover:text-white w-36"
+            onClick={() => {
+              joinRoom();
+            }}
+          >
             Play Again
           </button>
         )}
