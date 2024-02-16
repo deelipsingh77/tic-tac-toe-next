@@ -17,6 +17,7 @@ export default function Page() {
   const [winner, setWinner] = useState<string>("");
   const [isDraw, setIsDraw] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
+  const [joinStatus, setJoinStatus] = useState<boolean>(false);
   const [room, setRoom] = useState({
     roomId: "",
     sender: socket.id,
@@ -108,7 +109,7 @@ export default function Page() {
     // }); // Clear the room ID
   };
 
-  return room.player ? (
+  return joinStatus ? (
     <div className="h-[calc(100vh-5rem)] flex justify-center items-center flex-col gap-10">
       {winner || isDraw ? (
         isDraw ? (
@@ -132,6 +133,6 @@ export default function Page() {
       <GameBoard gameBoard={gameBoard} handleClick={handleClick} />
     </div>
   ) : (
-    <ChoosePiece joinRoomFunction={joinRoom} />
+    <ChoosePiece joinRoom={joinRoom} setJoinStatus={setJoinStatus} />
   );
 }

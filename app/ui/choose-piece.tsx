@@ -1,13 +1,9 @@
-import React, { useRef, useState } from "react";
-
 interface ChoosePieceProps {
-  joinRoomFunction: () => void;
+  joinRoom: () => void;
+  setJoinStatus: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ChoosePiece: React.FC<ChoosePieceProps> = ({ joinRoomFunction }) => {
-  const [roomField, setRoomField] = useState<string>("");
-  const roomRef: any = useRef();
-
+const ChoosePiece: React.FC<ChoosePieceProps> = ({ joinRoom, setJoinStatus }) => {
   return (
     <div className="h-[calc(100vh-5rem)] flex justify-center items-center">
       <div className="flex shadow-xl w-60 flex-col gap-10">
@@ -16,7 +12,8 @@ const ChoosePiece: React.FC<ChoosePieceProps> = ({ joinRoomFunction }) => {
           <button
             className="border-4 p-4 rounded-2xl shadow-lg hover:bg-slate-500 hover:text-white w-36"
             onClick={() => {
-              joinRoomFunction();
+              joinRoom();
+              setJoinStatus((prev)=>!prev)
             }}
           >
             Play Online
@@ -24,7 +21,7 @@ const ChoosePiece: React.FC<ChoosePieceProps> = ({ joinRoomFunction }) => {
           <button
             className="border-4 p-4 rounded-2xl shadow-lg hover:bg-slate-500 hover:text-white w-36"
             onClick={() => {
-              joinRoomFunction();
+              joinRoom();
             }}
           >
             Play with Friend
