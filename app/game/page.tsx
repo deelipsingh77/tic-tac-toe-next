@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import ChoosePiece from "../ui/choose-piece";
+import ChooseOpponent from "@/app/ui/choose-opponent";
 import io from "socket.io-client";
-import TurnIndicator from "../ui/turn-indicator";
-import GameBoard from "../ui/game-board";
+import TurnIndicator from "@/app/ui/turn-indicator";
+import GameBoard from "@/app/ui/game-board";
 
 const SERVER_URL: string =
   process.env.NEXT_PUBLIC_URL || "wss://tic-tac-toe-server-ykw6.onrender.com";
@@ -18,7 +18,7 @@ export default function Page() {
   const [isDraw, setIsDraw] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
   const [joinStatus, setJoinStatus] = useState<boolean>(false);
-  const [room, setRoom] = useState({
+  const [roomPass, setRoomPass] = useState({
     roomId: "",
     sender: socket.id,
     player: "",
@@ -39,9 +39,9 @@ export default function Page() {
 
     socket.on("roomDetails", (newRoom) => {
       setGameBoard(newRoom.gameBoard);
-      if (newRoom.turn === room.player){
+      if (newRoom.turn === roomPass.player) {
         setTurn(true);
-      }else {
+      } else {
         setTurn(false);
       }
     });
@@ -55,8 +55,8 @@ export default function Page() {
     );
 
     socket.on("joinRoomResponse", (newRoom) => {
-      if (newRoom.sender === room.sender) {
-        setRoom(newRoom);
+      if (newRoom.sender === roomPass.sender) {
+        setRoomPass(newRoom);
       }
     });
 
@@ -72,13 +72,13 @@ export default function Page() {
       socket.off("gameStart");
       socket.off("handleTurns");
     };
-  }, [room]);
+  }, [roomPass]);
 
   const handleMove = (index: number) => {
     socket.emit("move", {
       index: index,
-      player: room.player,
-      roomId: room.roomId,
+      player: roomPass.player,
+      roomId: roomPass.roomId,
       sender: socket.id,
     });
   };
@@ -86,8 +86,9 @@ export default function Page() {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const button = e.target as HTMLButtonElement;
     if (turn && !winner && !isDraw) {
-      button.innerText = room.player;
+      button.innerText = roomPass.player;
       handleMove(parseInt(button.id));
+      setTurn(false);
     }
   };
 
@@ -98,29 +99,30 @@ export default function Page() {
       player: player,
     };
     socket.emit("join_room", newRoom);
-    setRoom(newRoom);
+    setRoomPass(newRoom);
   };
 
-  const leaveRoom = (roomField: string) => {
-    socket.emit("leave_room", room);
-    // setRoom((prev) => {
-    //   return { ...prev, roomId: "" };
-    // }); // Clear the room ID
+  const leaveRoom = () => {
+    socket.emit("leave_room", roomPass);
+    setRoomPass((prev) => {
+      return { ...prev, roomId: "" };
+    });
+    setJoinStatus(false);
   };
 
   return joinStatus ? (
-    <div className="h-[calc(100vh-5rem)] flex justify-center items-center flex-col gap-10">
+    <div className="h-screen flex justify-center items-center flex-col gap-10">
       {winner || isDraw ? (
         isDraw ? (
-          <h1 className="text-blue-500 text-2xl">The game is Draw</h1>
+          <h1 className="text-blue-500 text-2xl">It's a Tie</h1>
         ) : (
           <h1
             className={clsx("text-2xl", {
-              "text-green-500": room.player === winner,
-              "text-red-500": room.player !== winner,
+              "text-green-500": roomPass.player === winner,
+              "text-red-500": roomPass.player !== winner,
             })}
           >
-            {room.player === winner ? "You Win" : "You Lose"}
+            {roomPass.player === winner ? "You Win" : "You Lose"}
           </h1>
         )
       ) : gameStart ? (
@@ -130,8 +132,21 @@ export default function Page() {
       )}
 
       <GameBoard gameBoard={gameBoard} handleClick={handleClick} />
+      <div>
+        {(winner || isDraw) && (
+          <button className="border-4 p-4 rounded-2xl shadow-lg hover:bg-green-500 hover:text-white w-36">
+            Play Again
+          </button>
+        )}
+        <button
+          className="border-4 p-4 rounded-2xl shadow-lg hover:bg-red-500 hover:text-white w-36"
+          onClick={leaveRoom}
+        >
+          Quit
+        </button>
+      </div>
     </div>
   ) : (
-    <ChoosePiece joinRoom={joinRoom} setJoinStatus={setJoinStatus} />
+    <ChooseOpponent joinRoom={joinRoom} setJoinStatus={setJoinStatus} />
   );
 }
