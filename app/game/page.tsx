@@ -18,6 +18,7 @@ export default function Page() {
   const [isDraw, setIsDraw] = useState<boolean>(false);
   const [gameStart, setGameStart] = useState<boolean>(false);
   const [joinStatus, setJoinStatus] = useState<boolean>(false);
+  const [opponentConnected, setOpponentConnected] = useState<boolean>(false);
   const [roomPass, setRoomPass] = useState({
     roomId: "",
     sender: socket.id,
@@ -35,6 +36,7 @@ export default function Page() {
 
     socket.on("gameStart", (status) => {
       setGameStart(status);
+      setOpponentConnected(true);
     });
 
     socket.on("roomDetails", (newRoom) => {
@@ -58,6 +60,10 @@ export default function Page() {
       if (newRoom.sender === roomPass.sender) {
         setRoomPass(newRoom);
       }
+    });
+
+    socket.on("opponentLeft", () => {
+      setOpponentConnected(false);
     });
 
     socket.on("connect_error", (error) => {
@@ -126,7 +132,11 @@ export default function Page() {
           </h1>
         )
       ) : gameStart ? (
-        <TurnIndicator turn={turn} />
+        opponentConnected ? (
+          <TurnIndicator turn={turn} />
+        ) : (
+          <h1 className="text-2xl text-red-500">Opponent Left</h1>
+        )
       ) : (
         <h1 className="text-2xl text-blue-500">Waiting For Opponent</h1>
       )}
