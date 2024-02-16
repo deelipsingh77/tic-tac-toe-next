@@ -6,9 +6,7 @@ import io from "socket.io-client";
 import TurnIndicator from "../ui/turn-indicator";
 import GameBoard from "../ui/game-board";
 
-const socket = io(`${process.env.NEXT_PUBLIC_SERVER_URL}:${process.env.NEXT_PUBLIC_SERVER_PORT}`,{
-  transports: ['websocket']
-});
+const socket = io("wss://tic-tac-toe-server-ykw6.onrender.com:5000");
 
 export default function Page() {
   const [gameBoard, setGameBoard] = useState(Array(9).fill(null));
