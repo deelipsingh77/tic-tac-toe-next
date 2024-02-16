@@ -37,14 +37,12 @@ export default function Page() {
       setGameStart(status);
     });
 
-    socket.on("updateBoard", (newBoard) => {
-      setGameBoard(newBoard);
-      setTurn((prev) => !prev);
-    });
-
-    socket.on("handleTurns", (piece) => {
-      if (piece == room.player) {
-        setTurn((prev) => !prev);
+    socket.on("roomDetails", (newRoom) => {
+      setGameBoard(newRoom.gameBoard);
+      if (newRoom.turn === room.player){
+        setTurn(true);
+      }else {
+        setTurn(false);
       }
     });
 
@@ -100,6 +98,7 @@ export default function Page() {
       player: player,
     };
     socket.emit("join_room", newRoom);
+    setRoom(newRoom);
   };
 
   const leaveRoom = (roomField: string) => {
