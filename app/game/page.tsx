@@ -6,7 +6,8 @@ import io from "socket.io-client";
 import TurnIndicator from "../ui/turn-indicator";
 import GameBoard from "../ui/game-board";
 
-const SERVER_URL= process.env.NEXT_PUBLIC_URL || "wss://tic-tac-toe-server-ykw6.onrender.com"
+const SERVER_URL: string =
+  process.env.NEXT_PUBLIC_URL || "wss://tic-tac-toe-server-ykw6.onrender.com";
 
 const socket = io(SERVER_URL);
 
@@ -91,14 +92,13 @@ export default function Page() {
     }
   };
 
-  const joinRoom = (player: string, roomField: string) => {
+  const joinRoom = (player: string = "", roomField: string = "") => {
     const newRoom = {
       roomId: roomField,
       sender: socket.id,
       player: player,
     };
     socket.emit("join_room", newRoom);
-    setRoom(newRoom);
   };
 
   const leaveRoom = (roomField: string) => {
