@@ -6,7 +6,9 @@ import io from "socket.io-client";
 import TurnIndicator from "../ui/turn-indicator";
 import GameBoard from "../ui/game-board";
 
-const socket = io("wss://tic-tac-toe-server-ykw6.onrender.com");
+const SERVER_URL= process.env.NEXT_PUBLIC_URL || "wss://tic-tac-toe-server-ykw6.onrender.com"
+
+const socket = io(SERVER_URL);
 
 export default function Page() {
   const [gameBoard, setGameBoard] = useState(Array(9).fill(null));
@@ -110,7 +112,7 @@ export default function Page() {
     <div className="h-[calc(100vh-5rem)] flex justify-center items-center flex-col gap-10">
       {winner || isDraw ? (
         isDraw ? (
-          <h1 className="text-blue-500">The game is Draw</h1>
+          <h1 className="text-blue-500 text-2xl">The game is Draw</h1>
         ) : (
           <h1
             className={clsx("text-2xl", {
