@@ -46,6 +46,7 @@ export default function Page() {
       } else {
         setTurn(false);
       }
+      console.log(newRoom);
     });
 
     socket.on(
@@ -104,8 +105,9 @@ export default function Page() {
       sender: socket.id,
       player: player,
     };
-    socket.emit("join_room", newRoom);
     setRoomPass(newRoom);
+    setGameStart(false);
+    socket.emit("join_room", newRoom);
   };
 
   const leaveRoom = () => {
@@ -148,6 +150,18 @@ export default function Page() {
             Play Again
           </button>
         )}
+
+        {!opponentConnected && (
+          <button
+            className="border-4 p-4 rounded-2xl shadow-lg hover:bg-green-500 hover:text-white w-36"
+            onClick={() => {
+              joinRoom();
+            }}
+          >
+            New Game
+          </button>
+        )}
+
         <button
           className="border-4 p-4 rounded-2xl shadow-lg hover:bg-red-500 hover:text-white w-36"
           onClick={leaveRoom}
